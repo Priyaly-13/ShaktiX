@@ -4,7 +4,8 @@
 #>
 
 param(
-  [int]$Port = 5050
+  [int]$Port = $(if ($env:PORT) { [int]$env:PORT } else { 5050 }),
+  [string]$HostName = $(if ($env:REPLATE_HOST) { $env:REPLATE_HOST } else { 'localhost' })
 )
 
 $ErrorActionPreference = 'Stop'
@@ -80,7 +81,7 @@ function New-AuthToken {
   $payloadObj = [ordered]@{ loginId = $LoginId; role = $Role; exp = $exp }
   $payloadJson = $payloadObj | ConvertTo-Json -Compress
   $payloadB64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($payloadJson))
-  $hmac = New-Object System.Security.Cryptography.HMACSHA256([Text.Encoding]::UTF8.GetBytes($AuthSecret))
+  $hmac = New-Object System.Security.Cryptography.HMACSHA256 (,[Text.Encoding]::UTF8.GetBytes($AuthSecret))
   $sigBytes = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($payloadB64))
   $sigB64 = ConvertTo-Base64Url $sigBytes
   return "$payloadB64.$sigB64"
@@ -92,7 +93,7 @@ function Read-AuthToken {
   $parts = $Token -split '\.'
   if ($parts.Length -ne 2) { return $null }
   try {
-    $hmac = New-Object System.Security.Cryptography.HMACSHA256([Text.Encoding]::UTF8.GetBytes($AuthSecret))
+    $hmac = New-Object System.Security.Cryptography.HMACSHA256 (,[Text.Encoding]::UTF8.GetBytes($AuthSecret))
     $expectedSig = ConvertTo-Base64Url ($hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($parts[0])))
     if ($expectedSig -ne $parts[1]) { return $null }
     $json = [Text.Encoding]::UTF8.GetString((ConvertFrom-Base64Url $parts[0]))
@@ -748,7 +749,7 @@ function Get-RequestUser {
 # ==============================================================================
 Initialize-Database
 $Listener = New-Object System.Net.HttpListener
-$Prefix = "http://localhost:$Port/"
+$Prefix = "http://${HostName}:$Port/"
 $Listener.Prefixes.Add($Prefix)
 $Listener.Start()
 Write-Host "REPLATE server running at $Prefix"
@@ -782,6 +783,10 @@ try {
 
       if ($path -eq '/api/auth/login' -and $req.HttpMethod -eq 'POST') {
         $body = Read-RequestBodyJson $req
+        if (-not $body) {
+          Send-Json $res 400 @{ ok = $false; error = 'Missing login credentials.' }
+          continue
+        }
         $db = Read-Db
         $loginId = if ($body.loginId) { $body.loginId.Trim().ToLower() } else { '' }
         $password = if ($body.password) { [string]$body.password } else { '' }
@@ -799,6 +804,10 @@ try {
 
       if ($path -eq '/api/auth/register' -and $req.HttpMethod -eq 'POST') {
         $body = Read-RequestBodyJson $req
+        if (-not $body) {
+          Send-Json $res 400 @{ ok = $false; error = 'Missing registration details.' }
+          continue
+        }
         $db = Read-Db
         $loginId = if ($body.loginId) { $body.loginId.Trim().ToLower() } else { '' }
         $password = if ($body.password) { [string]$body.password } else { '' }
@@ -833,8 +842,8 @@ try {
           continue
         }
 
-        $parts = $name -split '\s+' | Where-Object { $_ }
-        $initials = if ($parts.Length -ge 2) { ($parts[0][0] + $parts[1][0]).ToUpper() } else { $name.Substring(0, [Math]::Min(2, $name.Length)).ToUpper() }
+        $parts = @($name -split '\s+' | Where-Object { $_ })
+        $initials = if ($parts.Length -ge 2) { "$($parts[0][0])$($parts[1][0])".ToUpper() } else { $name.Substring(0, [Math]::Min(2, $name.Length)).ToUpper() }
 
         $newUser = [ordered]@{
           loginId = $loginId
@@ -883,7 +892,7 @@ try {
       # Public landing preview data (safe summary only)
       if ($path -eq '/api/public/summary' -and $req.HttpMethod -eq 'GET') {
         $db = Read-Db
-        $featured = $db.donations | Where-Object { $_.safetyStatus -eq 'Approved' } | Select-Object -First 3
+        $featured = @($db.donations | Where-Object { $_.safetyStatus -eq 'Approved' } | Select-Object -First 3)
         Send-Json $res 200 @{
           ok = $true
           featuredDonations = $featured
@@ -909,13 +918,13 @@ try {
         Send-Json $res 200 @{
           ok = $true
           user = (ConvertTo-PublicUser $user)
-          donations = $db.donations
-          matches = $db.matches
-          pickups = $db.pickups
-          notifications = $db.notifications
+          donations = @($db.donations)
+          matches = @($db.matches)
+          pickups = @($db.pickups)
+          notifications = @($db.notifications)
           impactData = $db.impactData
-          safetyLogs = if ($user.role -eq 'admin') { $db.safetyLogs } else { @($db.safetyLogs | Where-Object { $_.donorLoginId -eq $user.loginId }) }
-          users = $publicUsers
+          safetyLogs = if ($user.role -eq 'admin') { @($db.safetyLogs) } else { @($db.safetyLogs | Where-Object { $_.donorLoginId -eq $user.loginId }) }
+          users = @($publicUsers)
         }
         continue
       }
@@ -1225,8 +1234,8 @@ try {
         if ($null -ne $body.urgentAlerts) { $user.urgentAlerts = [bool]$body.urgentAlerts }
         if ($null -ne $body.emailDigest) { $user.emailDigest = [bool]$body.emailDigest }
 
-        $parts = $user.name -split '\s+' | Where-Object { $_ }
-        $user.initials = if ($parts.Length -ge 2) { ($parts[0][0] + $parts[1][0]).ToUpper() } else { $user.name.Substring(0, [Math]::Min(2, $user.name.Length)).ToUpper() }
+        $parts = @($user.name -split '\s+' | Where-Object { $_ })
+        $user.initials = if ($parts.Length -ge 2) { "$($parts[0][0])$($parts[1][0])".ToUpper() } else { $user.name.Substring(0, [Math]::Min(2, $user.name.Length)).ToUpper() }
 
         Write-Db $db
         Send-Json $res 200 @{ ok = $true; user = (ConvertTo-PublicUser $user) }
@@ -1236,7 +1245,8 @@ try {
       # ------------------------------------------------------------------------
       # STATIC FILES
       # ------------------------------------------------------------------------
-      $relPath = if ($path -eq '/' -or $path -eq '') { 'index.html' } else { $path.TrimStart('/').Replace('/', '\') }
+      $decodedPath = [System.Web.HttpUtility]::UrlDecode($path)
+      $relPath = if ($decodedPath -eq '/' -or $decodedPath -eq '') { 'index.html' } else { $decodedPath.TrimStart('/').Replace('/', '\') }
       $fullPath = [IO.Path]::GetFullPath((Join-Path $RootDir $relPath))
 
       if (-not $fullPath.StartsWith($RootDir)) {
@@ -1245,8 +1255,9 @@ try {
         continue
       }
 
-      # Prevent direct access to db.json or auth secret or server.ps1
-      if ($relPath -in @('db.json', '.auth_secret', 'server.ps1')) {
+      # Prevent direct access to db.json, auth secret, server.ps1, or .git
+      $relNorm = $relPath.Replace('\', '/').ToLower()
+      if ($relNorm -in @('db.json', '.auth_secret', 'server.ps1') -or $relNorm.StartsWith('.git')) {
         $res.StatusCode = 403
         $res.OutputStream.Close()
         continue

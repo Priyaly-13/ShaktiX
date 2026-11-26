@@ -18,6 +18,12 @@
   let donateSafetyError = '';
   let authError = '';
 
+  function renderFoodPhotoImg(foodName, customPhotoUrl = '') {
+    const src = escapeHtml(Store.getFoodImage(foodName, customPhotoUrl));
+    const fallbackSrc = escapeHtml(Store.getFallbackFoodSvgDataUrl(foodName));
+    return `<img class="food-photo-img" src="${src}" alt="${escapeHtml(foodName)}" onerror="this.onerror=null;this.src='${fallbackSrc}'" />`;
+  }
+
   function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -251,7 +257,7 @@
             <div class="collage-col">
               <div class="pin-card">
                 <div class="food-photo-frame compact" style="margin-bottom:12px;">
-                  <img class="food-photo-img" src="${Store.getFoodImage('Kadhi Chawal')}" alt="Kadhi Chawal" />
+                  ${renderFoodPhotoImg('Kadhi Chawal')}
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                   <span class="badge badge-olive">Matched</span>
@@ -282,7 +288,7 @@
 
               <div class="pin-card">
                 <div class="food-photo-frame compact" style="margin-bottom:12px;">
-                  <img class="food-photo-img" src="${Store.getFoodImage('Veg Biryani')}" alt="Veg Biryani" />
+                  ${renderFoodPhotoImg('Veg Biryani')}
                 </div>
                 <span class="badge badge-blush" style="margin-bottom:6px;">Fresh &amp; Safe</span>
                 <h3 style="font-size:1.12rem; margin-bottom:4px;">Veg Biryani</h3>
@@ -348,7 +354,7 @@
                 (item) => `
               <div class="masonry-item card card-interactive">
                 <div class="food-photo-frame" style="margin-bottom:14px;">
-                  <img class="food-photo-img" src="${escapeHtml(Store.getFoodImage(item.title, item.imageUrl))}" alt="${escapeHtml(item.title)}" onerror="this.src='/images/fallback-food.jpg'" />
+                  ${renderFoodPhotoImg(item.title, item.imageUrl)}
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                   <span class="badge ${getStatusBadgeClass(item.status)}">${escapeHtml(item.status)}</span>
@@ -909,7 +915,7 @@
                   (item) => `
                 <div class="card card-ivory card-interactive" style="padding:16px; border-radius:18px; display:flex; flex-direction:column; gap:10px;">
                   <div class="food-photo-frame compact">
-                    <img class="food-photo-img" src="${escapeHtml(Store.getFoodImage(item.title, item.imageUrl))}" alt="${escapeHtml(item.title)}" onerror="this.src='/images/fallback-food.jpg'" />
+                    ${renderFoodPhotoImg(item.title, item.imageUrl)}
                   </div>
                   <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
                     <span class="badge ${getStatusBadgeClass(item.status)}">${escapeHtml(item.status)}</span>
@@ -1278,7 +1284,7 @@
                   return `
                     <article class="card card-interactive pinterest-card">
                       <div class="food-photo-frame">
-                        <img class="food-photo-img" src="${escapeHtml(Store.getFoodImage(item.title, item.imageUrl))}" alt="${escapeHtml(item.title)}" onerror="this.src='/images/fallback-food.jpg'" />
+                        ${renderFoodPhotoImg(item.title, item.imageUrl)}
                       </div>
 
                       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
