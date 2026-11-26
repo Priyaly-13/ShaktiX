@@ -1,32 +1,62 @@
 # ShaktiX
-# REPLATE — FULL PROJECT AUDIT, REPAIR, OPTIMIZATION & DEPLOYMENT MASTER PROMPT
+# REPLATE – Saving Food. Feeding Lives. 🌱
 
-You are a senior full-stack software engineer, UI/UX designer, backend architect, database engineer, QA tester, and deployment specialist.
+**REPLATE** is a food redistribution platform developed by **Team ShaktiX** to reduce food waste and help people in need.
 
-I have an existing project named **REPLATE**, built for a hackathon by Team ShaktiX. My existing GitHub repository is:
+Our platform connects food donors, NGOs, and volunteers to ensure surplus food reaches the right people instead of going to waste.
 
-https://github.com/Priyaly-13/ShaktiX
+## 💡 Problem Statement
 
-Your task is to thoroughly inspect, repair, optimize, and complete the ENTIRE EXISTING PROJECT. Do not unnecessarily rebuild the project from scratch. Work with the existing codebase, preserve its identity, and fix every broken or incomplete feature you can find.
+Every day, large amounts of edible food are wasted by restaurants, events, and individuals, while many people struggle to access meals. REPLATE aims to bridge this gap through a simple and organized food redistribution system.
 
-Do not just give me instructions or suggestions. ACTUALLY INSPECT THE CODE, EDIT THE FILES, IMPLEMENT FIXES, AND TEST THE PROJECT.
+## 🚀 Our Solution
+
+REPLATE provides a platform where:
+- **Donors** can list surplus food.
+- **NGOs** can discover and request available food donations.
+- **Volunteers** can help with food pickup and delivery.
+- **Smart Matching** helps connect donations with suitable NGOs based on distance, urgency, food demand, and category.
+
+## ✨ Key Features
+
+- User registration and login.
+- Separate dashboards for donors, NGOs, and volunteers.
+- Food donation listing and management.
+- NGO-donation matching system.
+- Food safety information and verification workflow.
+- Volunteer pickup and delivery coordination.
+- AI-assisted food information extraction (where configured).
+
+## 🔄 How It Works
+
+1. A donor adds details about surplus food.
+2. Food safety information is checked.
+3. Suitable NGOs are matched with the donation.
+4. An NGO requests or accepts the donation.
+5. A volunteer helps coordinate pickup and delivery.
+6. Food reaches people who need it.
+
+## 🎯 Our Mission
+
+To reduce food wastage, improve food accessibility, and build a community where surplus food becomes a resource rather than waste.
+
+## 🛠️ Technology Stack
+
+The technology stack and tools used in this project are documented according to the actual implementation in this repository.
+
+## 👩‍💻 Team ShaktiX
+
+- Priyal
+- Ayushi Saxena
+- Pavani
+- Manishka Chahar
+
+## 🌍 Vision
+
+**Saving Food. Feeding Lives.**
+
+We believe that technology can make food redistribution smarter, faster, and more accessible.
 
 ---
 
-## 1. FIRST — FULL PROJECT AUDIT
-
-Before making any changes:
-
-- Inspect every relevant folder and file.
-- Identify the current framework, programming languages, frontend, backend, database, APIs, deployment configuration, and project structure.
-- Check all existing features and determine which are working, partially working, or broken.
-- Find broken imports, API routes, configuration files, missing dependencies, database problems, frontend/backend integration issues, asset loading issues, and deployment errors.
-- Check for hardcoded localhost URLs, incorrect paths, broken environment variables, and inconsistent API endpoints.
-- Review existing UI and preserve working features.
-- Create a clear repair plan internally and execute it.
-
-Do not replace functioning code without a reason.
-
----
-
-## 2. PROJECT DESIGN — RE
+*Built with ❤️ by Team ShaktiX.*
