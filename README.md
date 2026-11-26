@@ -50,6 +50,7 @@ The technology stack and tools used in this project are documented according to 
 - Ayushi Saxena
 - Pavani
 - Manishka Chahar
+## Live Demo :- https://shaktix.vercel.app/
 
 ## 🌍 Vision
 
